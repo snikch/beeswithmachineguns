@@ -88,6 +88,9 @@ commands:
     attack_group.add_option('-c', '--concurrent', metavar="CONCURRENT", nargs=1,
                         action='store', dest='concurrent', type='int', default=100,
                         help="The number of concurrent connections to make to the target (default: 100).")
+    attack_group.add_option('-C', '--cookie', metavar="COOKIE", nargs=1,
+                        action='store', dest='cookie', type='string', default=False,
+                        help="COOKIE in name=value pair")
 
     parser.add_option_group(attack_group)
 
@@ -110,7 +113,7 @@ commands:
         if not options.url:
             parser.error("To run an attack you need to specify a url with -u")
         
-        bees.attack(options.url, options.number, options.concurrent)
+        bees.attack(options.url, options.number, options.concurrent, options.cookie)
     elif command == "down":
         bees.down()
     elif command == "report":

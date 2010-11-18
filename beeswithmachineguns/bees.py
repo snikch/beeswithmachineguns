@@ -180,12 +180,24 @@ def _attack(params):
 
         print 'Bee %i is firing his machine gun. Bang bang!' % params['i']
 
-        stdin, stdout, stderr = client.exec_command('ab -r -n %(num_requests)s -c %(concurrent_requests)s -C "sessionid=NotARealSessionID" %(url)s' % params)
+        if params['cookie']:
+            params['cookie']  = '%(cookie)s' % params
+        else:
+            params['cookie']  = 'sessionid=NotARealSessionID'
 
+        command = 'ab -r -n %(num_requests)s -c %(concurrent_requests)s -C "%(cookie)s" %(url)s' % params
+
+        # Debugging, remove
+        print command
+
+        stdin, stdout, stderr = client.exec_command(command)
         response = {}
 
         ab_results = stdout.read()
         ms_per_request_search = re.search('Time\ per\ request:\s+([0-9.]+)\ \[ms\]\ \(mean\)', ab_results)
+
+        # Debugging, remove
+        print ab_results
 
         if not ms_per_request_search:
             print 'Bee %i lost sight of the target (connection timed out).' % params['i']
@@ -263,8 +275,8 @@ def _print_results(results):
         print 'Mission Assessment: Target severely compromised.'
     else:
         print 'Mission Assessment: Swarm annihilated target.'
-    
-def attack(url, n, c):
+
+def attack(url, n, c, cookie):
     """
     Test the root url of this site.
     """
@@ -291,6 +303,8 @@ def attack(url, n, c):
     requests_per_instance = int(float(n) / instance_count)
     connections_per_instance = int(float(c) / instance_count)
 
+
+
     print 'Each of %i bees will fire %s rounds, %s at a time.' % (instance_count, requests_per_instance, connections_per_instance)
 
     params = []
@@ -305,12 +319,17 @@ def attack(url, n, c):
             'num_requests': requests_per_instance,
             'username': username,
             'key_name': key_name,
+            'cookie' : cookie
         })
+
 
     print 'Stinging URL so it will be cached for the attack.'
 
     # Ping url so it will be cached for testing
-    urllib2.urlopen(url)
+    headers = { 'Cookie': cookie }
+
+    req = urllib2.Request(url, '', headers)
+    urllib2.urlopen(req)
 
     print 'Organizing the swarm.'
 
