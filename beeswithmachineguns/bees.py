@@ -188,7 +188,7 @@ def _attack(params):
         command = 'ab -r -n %(num_requests)s -c %(concurrent_requests)s -C "%(cookie)s" %(url)s' % params
 
         # Debugging, remove
-        print command
+        #print command
 
         stdin, stdout, stderr = client.exec_command(command)
         response = {}
@@ -197,7 +197,7 @@ def _attack(params):
         ms_per_request_search = re.search('Time\ per\ request:\s+([0-9.]+)\ \[ms\]\ \(mean\)', ab_results)
 
         # Debugging, remove
-        print ab_results
+        #print ab_results
 
         if not ms_per_request_search:
             print 'Bee %i lost sight of the target (connection timed out).' % params['i']
@@ -326,10 +326,15 @@ def attack(url, n, c, cookie):
     print 'Stinging URL so it will be cached for the attack.'
 
     # Ping url so it will be cached for testing
-    headers = { 'Cookie': cookie }
+    print url
 
-    req = urllib2.Request(url, '', headers)
-    urllib2.urlopen(req)
+    if cookie != False:
+        headers = { 'Cookie': cookie }
+        req = urllib2.Request(url, '', headers)
+    else:
+        req = urllib2.Request(url)
+
+    #urllib2.urlopen(req)
 
     print 'Organizing the swarm.'
 
